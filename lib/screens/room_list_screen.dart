@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_chat_app/screens/add_room_screen.dart';
 import 'package:test_chat_app/screens/chat_room_screen.dart';
 
+import '../resources/auth_methods.dart';
+import 'login_screen.dart';
+
 class RoomListScreen extends StatefulWidget {
   const RoomListScreen({super.key});
 
@@ -16,6 +19,17 @@ class _RoomListScreenState extends State<RoomListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('チャット'),
+        leading: IconButton(
+          onPressed: () async {
+            await AuthMethods().signOut();
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LoginScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.logout),
+        ),
       ),
       body: Column(
         children: [

@@ -3,10 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_chat_app/screens/add_room_screen.dart';
 import 'package:test_chat_app/screens/chat_room_screen.dart';
 
-class RoomListScreen extends StatelessWidget {
-  // 引数からユーザー情報を受け取れるようにする
-  RoomListScreen();
+class RoomListScreen extends StatefulWidget {
+  const RoomListScreen({super.key});
 
+  @override
+  State<RoomListScreen> createState() => _RoomListScreenState();
+}
+
+class _RoomListScreenState extends State<RoomListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

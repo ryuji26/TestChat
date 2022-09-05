@@ -9,15 +9,16 @@ class ChatRoomScreen extends StatefulWidget {
 
   final String name;
   @override
-  _ChatRoomScreenState createState() => _ChatRoomScreenState();
+  ChatRoomScreenState createState() => ChatRoomScreenState();
 }
 
-class _ChatRoomScreenState extends State<ChatRoomScreen> {
+class ChatRoomScreenState extends State<ChatRoomScreen> {
   List<types.Message> _messages = [];
   String randomId = const Uuid().v4();
   final _user = const types.User(
       id: '06c33e8b-e835-4736-80f4-63f44b66666c', firstName: '名前');
 
+  @override
   void initState() {
     _getMessages();
     super.initState();

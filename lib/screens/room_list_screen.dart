@@ -17,74 +17,51 @@ class _RoomListScreenState extends State<RoomListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('チャット'),
-        leading: IconButton(
-          onPressed: () async {
-            await AuthMethods().signOut();
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const LoginScreen(),
+        appBar: AppBar(
+          title: const Text('チャット'),
+          leading: IconButton(
+            onPressed: () async {
+              await AuthMethods().signOut();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ),
+        body: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+          builder: (context,
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return ListView.builder(
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (ctx, index) => Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: width > webScreenSize ? width * 0.3 : 0,
+                  vertical: width > webScreenSize ? 15 : 0,
+                ),
+                child: PostCard(
+                  snap: snapshot.data!.docs[index].data(),
+                ),
               ),
             );
           },
-          icon: const Icon(Icons.logout),
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-              // Stream 非同期処理の結果を元にWidgetを作る
-              child: StreamBuilder<QuerySnapshot>(
-            // 投稿メッセージ一覧の取得
-            stream: FirebaseFirestore.instance
-                .collection('chat_room')
-                .orderBy('createdAt')
-                .snapshots(),
-            builder: (context, snapshot) {
-              // データが取得できた場合
-              if (snapshot.hasData) {
-                final List<DocumentSnapshot> documents = snapshot.data!.docs;
-                return ListView(
-                  children: documents.map((document) {
-                    return Card(
-                      child: ListTile(
-                        title: Text(document['name']),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.input),
-                          onPressed: () async {
-                            // チャットページへ画面遷移
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return ChatRoomScreen(document['name']);
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              }
-              // データが読込中の場合
-              return const Center(
-                child: Text('読込中……'),
-              );
-            },
-          )),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) {
-            return AddRoomScreen();
-          }));
-        },
-      ),
-    );
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async {
+            await Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) {
+              return AddRoomScreen();
+            }));
+          },
+        ));
   }
 }

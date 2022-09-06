@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:test_chat_app/resources/auth_methods.dart';
 import 'package:test_chat_app/screens/room_list_screen.dart';
 import 'package:test_chat_app/screens/login_screen.dart';
@@ -17,7 +18,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
   bool _isLoading = false;
   Uint8List? _image;
 
@@ -40,13 +40,14 @@ class _SignupScreenState extends State<SignupScreen> {
       email: _emailController.text,
       password: _passwordController.text,
       username: _usernameController.text,
+      file: _image!,
     );
     // successが返された場合、ユーザー登録が成功
     if (res == "success") {
       setState(() {
         _isLoading = false;
       });
-      // HomeScreenに移動
+      // RoomListScreenに移動
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => RoomListScreen(),
@@ -59,6 +60,14 @@ class _SignupScreenState extends State<SignupScreen> {
       // エラーの表示
       showSnackBar(context, res);
     }
+  }
+
+  // CircleAvatarに選択した画像を表示する
+  selectImage() async {
+    Uint8List im = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = im;
+    });
   }
 
   @override
@@ -92,6 +101,14 @@ class _SignupScreenState extends State<SignupScreen> {
                           backgroundImage: NetworkImage(
                               'https://knsoza1.com/wp-content/uploads/2020/07/70b3dd52350bf605f1bb4078ef79c9b9.png'),
                         ),
+                  Positioned(
+                    bottom: -10,
+                    left: 80,
+                    child: IconButton(
+                      onPressed: selectImage,
+                      icon: const Icon(Icons.add_a_photo),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(

@@ -1,125 +1,125 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import 'package:test_chat_app/data/user_data.dart';
 
-import '../utils/user_state.dart';
-import 'login_screen.dart';
+import '../providers/user_provider.dart';
+import '../resources/firestore_methods.dart';
+import '../utils/utils.dart';
+import '../widget/comment_card.dart';
 
 class ChatRoomScreen extends StatefulWidget {
-  const ChatRoomScreen(this.name, {Key? key}) : super(key: key);
+  final postId;
+  const ChatRoomScreen({Key? key, required this.postId}) : super(key: key);
 
-  final String name;
   @override
-  ChatRoomScreenState createState() => ChatRoomScreenState();
+  _ChatRoomScreenState createState() => _ChatRoomScreenState();
 }
 
-class ChatRoomScreenState extends State<ChatRoomScreen> {
-  List<types.Message> _messages = [];
-  String randomId = const Uuid().v4();
+class _ChatRoomScreenState extends State<ChatRoomScreen> {
+  final TextEditingController commentEditingController =
+      TextEditingController();
 
-  void initState() {
-    getData();
-    super.initState();
-  }
+  void postComment(String uid, String name, String profilePic) async {
+    try {
+      String res = await FireStoreMethods().postComment(
+        widget.postId,
+        commentEditingController.text,
+        uid,
+        name,
+        profilePic,
+      );
 
-  void getData() async {
-    final getData = await FirebaseFirestore.instance
-        .collection('chat_room')
-        .doc(widget.name)
-        .collection('contents')
-        .get();
-
-    final message = getData.docs
-        .map((d) => types.TextMessage(
-            author:
-                types.User(id: d.data()['uid'], firstName: d.data()['name']),
-            createdAt: d.data()['createdAt'],
-            id: d.data()['id'],
-            text: d.data()['text']))
-        .toList();
-
-    setState(() {
-      _messages = [...message];
-    });
-  }
-
-  void _addMessage(types.TextMessage message) async {
-    setState(() {
-      _messages.insert(0, message);
-    });
-    await FirebaseFirestore.instance
-        .collection('chat_room')
-        .doc(widget.name)
-        .collection('contents')
-        .add({
-      'uid': message.author.id,
-      'name': message.author.firstName,
-      'createdAt': message.createdAt,
-      'id': message.id,
-      'text': message.text,
-    });
-  }
-
-  void _handlePreviewDataFetched(
-    types.TextMessage message,
-    types.PreviewData previewData,
-  ) {
-    final index = _messages.indexWhere((element) => element.id == message.id);
-    final updatedMessage = _messages[index].copyWith(previewData: previewData);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (res != 'success') {
+        showSnackBar(context, res);
+      }
       setState(() {
-        _messages[index] = updatedMessage;
+        commentEditingController.text = "";
       });
-    });
+    } catch (err) {
+      showSnackBar(
+        context,
+        err.toString(),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // ユーザー情報を受け取る
-    final UserState userState = Provider.of<UserState>(context);
-    final User user = userState.user!;
-    final _uid = types.User(id: user.uid, firstName: user.email);
+    final User user = Provider.of<UserProvider>(context).getUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('チャット'),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                await Navigator.of(context)
-                    .pushReplacement(MaterialPageRoute(builder: (context) {
-                  return LoginScreen();
-                }));
-              })
-        ],
-      ),
-      body: Chat(
-        theme: const DefaultChatTheme(
-          inputBackgroundColor: Colors.blue,
-          sendButtonIcon: Icon(Icons.send),
-          sendingIcon: Icon(Icons.update_outlined),
+        // backgroundColor: mobileBackgroundColor,
+        title: const Text(
+          'コメント',
         ),
-        showUserNames: true,
-        messages: _messages,
-        onPreviewDataFetched: _handlePreviewDataFetched,
-        onSendPressed: (types.PartialText message) {
-          final textMessage = types.TextMessage(
-            author: _uid,
-            createdAt: DateTime.now().millisecondsSinceEpoch,
-            id: randomId,
-            text: message.text,
-          );
+        centerTitle: false,
+      ),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('posts')
+            .doc(widget.postId)
+            .collection('comments')
+            .snapshots(),
+        builder: (context,
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          _addMessage(textMessage);
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (ctx, index) => CommentCard(
+              snap: snapshot.data!.docs[index],
+            ),
+          );
         },
-        user: _uid,
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          height: kToolbarHeight,
+          margin:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+                radius: 18,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 8),
+                  child: TextField(
+                    controller: commentEditingController,
+                    decoration: const InputDecoration(
+                      hintText: 'コメントを投稿する',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => postComment(
+                  user.uid,
+                  user.username,
+                  user.photoUrl,
+                ),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  child: const Text(
+                    '投稿',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

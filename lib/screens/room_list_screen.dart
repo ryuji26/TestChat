@@ -4,6 +4,7 @@ import 'package:test_chat_app/screens/add_room_screen.dart';
 import 'package:test_chat_app/screens/chat_room_screen.dart';
 
 import '../resources/auth_methods.dart';
+import '../widget/post_card.dart';
 import 'login_screen.dart';
 
 class RoomListScreen extends StatefulWidget {
@@ -43,10 +44,6 @@ class _RoomListScreenState extends State<RoomListScreen> {
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (ctx, index) => Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: width > webScreenSize ? width * 0.3 : 0,
-                  vertical: width > webScreenSize ? 15 : 0,
-                ),
                 child: PostCard(
                   snap: snapshot.data!.docs[index].data(),
                 ),

@@ -1,18 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/user_provider.dart';
+import '../resources/firestore_methods.dart';
+import '../utils/utils.dart';
 
 class AddRoomScreen extends StatefulWidget {
-  AddRoomScreen();
-
   @override
   _AddPostPageState createState() => _AddPostPageState();
 }
 
 class _AddPostPageState extends State<AddRoomScreen> {
-  String roomName = '';
+  final TextEditingController _chatroomTitleController =
+      TextEditingController();
+
+  bool isLoading = false;
+
+  void createRoom() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      String res = await FireStoreMethods().uploadPost(
+        _chatroomTitleController.text,
+      );
+      if (res == "success") {
+        setState(() {
+          isLoading = false;
+        });
+        showSnackBar(
+          context,
+          '作成しました',
+        );
+      } else {
+        showSnackBar(context, res);
+      }
+    } catch (err) {
+      setState(() {
+        isLoading = false;
+      });
+      showSnackBar(
+        context,
+        err.toString(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _chatroomTitleController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ルーム作成'),
@@ -23,37 +66,30 @@ class _AddPostPageState extends State<AddRoomScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'チャットルーム名'),
-                keyboardType: TextInputType.multiline,
+              TextField(
+                controller: _chatroomTitleController,
+                decoration: const InputDecoration(
+                    hintText: "ルーム名", border: InputBorder.none),
                 maxLines: 3,
-                onChanged: (String value) {
-                  setState(() {
-                    roomName = value;
-                  });
-                },
               ),
               const SizedBox(
                 height: 8,
               ),
               SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  child: const Text('投稿'),
-                  onPressed: () async {
-                    final date = DateTime.now().toLocal().toIso8601String();
-
-                    await FirebaseFirestore.instance
-                        .collection('chat_room')
-                        .doc(roomName)
-                        .set({
-                      'name': roomName,
-                      'createdAt': date,
-                    });
-                    Navigator.of(context).pop();
-                  },
-                ),
-              )
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      createRoom();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      "作成する",
+                      style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0),
+                    ),
+                  ))
             ],
           ),
         ),

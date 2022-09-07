@@ -22,7 +22,6 @@ class AuthMethods {
     required String email,
     required String password,
     required String username,
-    required String bio,
     required Uint8List file,
   }) async {
     String res = "Some error Occurred";
@@ -30,7 +29,6 @@ class AuthMethods {
       if (email.isNotEmpty ||
           password.isNotEmpty ||
           username.isNotEmpty ||
-          bio.isNotEmpty ||
           file != null) {
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
           email: email,
@@ -45,9 +43,6 @@ class AuthMethods {
           uid: cred.user!.uid,
           photoUrl: photoUrl,
           email: email,
-          bio: bio,
-          followers: [],
-          following: [],
         );
 
         await _firestore

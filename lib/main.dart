@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
                 // スナップショットのデータの有無を確認する
                 if (snapshot.hasData) {
                   // スナップショットにデータがあり、ログインしている場合はチャットルーム一覧を表示する
-                  return RoomListScreen();
+                  return const RoomListScreen();
                 } else if (snapshot.hasError) {
                   return Center(
                     child: Text('${snapshot.error}'),

@@ -50,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
       // RoomListScreenに移動
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => RoomListScreen(),
+          builder: (context) => const RoomListScreen(),
         ),
       );
     } else {
@@ -82,8 +82,8 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Flexible(
-                child: Container(),
                 flex: 2,
+                child: Container(),
               ),
               const SizedBox(
                 height: 64,
@@ -143,14 +143,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 height: 24,
               ),
               InkWell(
+                onTap: signUpUser,
                 child: Container(
-                  child: !_isLoading
-                      ? const Text(
-                          '登録する',
-                        )
-                      : const CircularProgressIndicator(
-                          // color: primaryColor,
-                          ),
                   width: double.infinity,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -160,24 +154,30 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     // color: blueColor,
                   ),
+                  child: !_isLoading
+                      ? const Text(
+                          '登録する',
+                        )
+                      : const CircularProgressIndicator(
+                          // color: primaryColor,
+                          ),
                 ),
-                onTap: signUpUser,
               ),
               const SizedBox(
                 height: 12,
               ),
               Flexible(
-                child: Container(),
                 flex: 2,
+                child: Container(),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: const Text(
                       '既にアカウントをお持ちですか？',
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).push(
@@ -186,13 +186,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: const Text(
                         ' ログイン',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ],

@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:test_chat_app/screens/add_room_screen.dart';
-import 'package:test_chat_app/screens/chat_room_screen.dart';
 
+import '../providers/user_provider.dart';
 import '../resources/auth_methods.dart';
 import '../widget/post_card.dart';
 import 'login_screen.dart';
 
 class RoomListScreen extends StatefulWidget {
-  const RoomListScreen({super.key});
+  const RoomListScreen({Key? key}) : super(key: key);
 
   @override
   State<RoomListScreen> createState() => _RoomListScreenState();
 }
 
 class _RoomListScreenState extends State<RoomListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    addData();
+  }
+
+  addData() async {
+    UserProvider _userProvider =
+        Provider.of<UserProvider>(context, listen: false);
+    await _userProvider.refreshUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,10 +56,8 @@ class _RoomListScreenState extends State<RoomListScreen> {
             }
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
-              itemBuilder: (ctx, index) => Container(
-                child: PostCard(
-                  snap: snapshot.data!.docs[index].data(),
-                ),
+              itemBuilder: (ctx, index) => PostCard(
+                snap: snapshot.data!.docs[index].data(),
               ),
             );
           },

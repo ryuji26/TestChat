@@ -24,7 +24,7 @@ class AuthMethods {
     required String username,
     required Uint8List file,
   }) async {
-    String res = "Some error Occurred";
+    String res = "エラーが発生しました";
     try {
       if (email.isNotEmpty ||
           password.isNotEmpty ||
@@ -64,7 +64,7 @@ class AuthMethods {
     required String email,
     required String password,
   }) async {
-    String res = "Some error Occurred";
+    String res = "エラーが発生しました";
     try {
       if (email.isNotEmpty || password.isNotEmpty) {
         await _auth.signInWithEmailAndPassword(

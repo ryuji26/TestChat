@@ -58,7 +58,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('posts')
+            .collection('rooms')
             .doc(widget.postId)
             .collection('comments')
             .orderBy('datePublished')

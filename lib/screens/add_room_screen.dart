@@ -21,7 +21,7 @@ class _AddPostPageState extends State<AddRoomScreen> {
       isLoading = true;
     });
     try {
-      String res = await FireStoreMethods().uploadPost(
+      String res = await FireStoreMethods().uploadRoom(
         _chatroomTitleController.text,
       );
       if (res == "success") {

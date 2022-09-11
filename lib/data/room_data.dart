@@ -1,29 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Post {
-  final String description;
-  final String postId;
+class ChatRoom {
+  final String roomName;
+  final String roomId;
   final DateTime datePublished;
 
-  const Post({
-    required this.description,
-    required this.postId,
+  const ChatRoom({
+    required this.roomName,
+    required this.roomId,
     required this.datePublished,
   });
 
-  static Post fromSnap(DocumentSnapshot snap) {
+  static ChatRoom fromSnap(DocumentSnapshot snap) {
     var snapshot = snap.data() as Map<String, dynamic>;
 
-    return Post(
-      description: snapshot["description"],
-      postId: snapshot["postId"],
+    return ChatRoom(
+      roomName: snapshot["roomName"],
+      roomId: snapshot["roomId"],
       datePublished: snapshot["datePublished"],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "description": description,
-        "postId": postId,
+        "roomName": roomName,
+        "roomId": roomId,
         "datePublished": datePublished,
       };
 }

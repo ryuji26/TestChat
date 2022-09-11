@@ -5,16 +5,16 @@ import 'package:uuid/uuid.dart';
 class FireStoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<String> uploadPost(String description) async {
-    String res = "Some error occurred";
+  Future<String> uploadRoom(String roomName) async {
+    String res = "エラーが発生しました";
     try {
-      String postId = const Uuid().v1();
-      Post post = Post(
-        description: description,
-        postId: postId,
+      String roomId = const Uuid().v1();
+      ChatRoom post = ChatRoom(
+        roomName: roomName,
+        roomId: roomId,
         datePublished: DateTime.now(),
       );
-      _firestore.collection('posts').doc(postId).set(post.toJson());
+      _firestore.collection('rooms').doc(roomId).set(post.toJson());
       res = "success";
     } catch (err) {
       res = err.toString();
@@ -22,15 +22,15 @@ class FireStoreMethods {
     return res;
   }
 
-  Future<String> postComment(String postId, String text, String uid,
+  Future<String> postComment(String roomId, String text, String uid,
       String name, String profilePic) async {
-    String res = "Some error occurred";
+    String res = "エラーが発生しました";
     try {
       if (text.isNotEmpty) {
         String commentId = const Uuid().v1();
         _firestore
-            .collection('posts')
-            .doc(postId)
+            .collection('rooms')
+            .doc(roomId)
             .collection('comments')
             .doc(commentId)
             .set({
@@ -51,10 +51,10 @@ class FireStoreMethods {
     return res;
   }
 
-  Future<String> deletePost(String postId) async {
+  Future<String> deletePost(String roomId) async {
     String res = "Some error occurred";
     try {
-      await _firestore.collection('posts').doc(postId).delete();
+      await _firestore.collection('rooms').doc(roomId).delete();
       res = 'success';
     } catch (err) {
       res = err.toString();
